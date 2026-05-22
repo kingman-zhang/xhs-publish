@@ -22,13 +22,24 @@ const SDK_URL =
 const XHS_TITLE_LIMIT = 20;
 const XHS_CONTENT_LIMIT = 1000;
 
+function normalizePlainText(value: string) {
+  return value
+    .replace(/\r\n/g, "\n")
+    .replace(/\u200B/g, "")
+    .replace(/^\s{0,3}#{1,6}\s+/gm, "")
+    .replace(/^\s*[-*•]\s+/gm, "")
+    .replace(/\n+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function buildShareContent(body: string, topics: string[]) {
-  const merged = `${body} ${topics.map((topic) => `#${topic}`).join(" ")}`.trim();
+  const merged = `${normalizePlainText(body)} ${topics.map((topic) => `#${normalizePlainText(topic)}`).join(" ")}`.trim();
   return merged.slice(0, XHS_CONTENT_LIMIT);
 }
 
 function buildShareTitle(title: string) {
-  return title.trim().slice(0, XHS_TITLE_LIMIT);
+  return normalizePlainText(title).slice(0, XHS_TITLE_LIMIT);
 }
 
 function ensureSdkLoaded(onLoad: () => void, onError: () => void) {
@@ -191,6 +202,8 @@ export function SharedNotePage() {
                 <div>`window.xhs`：{hasXhsObject ? "存在" : "不存在"}</div>
                 <div>标题长度：{buildShareTitle(payload.title).length} / {XHS_TITLE_LIMIT}</div>
                 <div>正文长度：{buildShareContent(payload.body, payload.topics).length} / {XHS_CONTENT_LIMIT}</div>
+                <div>发送标题：{buildShareTitle(payload.title) || "空"}</div>
+                <div>发送正文预览：{buildShareContent(payload.body, payload.topics).slice(0, 120) || "空"}</div>
                 <div>UA：{navigator.userAgent}</div>
                 {lastSdkError ? <div>最近错误：{lastSdkError}</div> : null}
               </div>
