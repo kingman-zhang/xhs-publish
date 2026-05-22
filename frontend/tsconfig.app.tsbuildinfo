@@ -1,0 +1,1 @@
+{"root":["./src/api.ts","./src/main.tsx","./src/router.tsx","./src/types.ts","./src/vite-env.d.ts","./src/views/appshell.tsx","./src/views/noteeditorpage.tsx","./src/views/notelistpage.tsx","./src/views/sharednotepage.tsx"],"version":"5.9.3"}

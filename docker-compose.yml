@@ -1,0 +1,50 @@
+networks:
+  default_net:
+    external: true
+services:
+  backend:
+    image: xhs-publish-backend:latest
+    container_name: xhs-publish-backend
+    restart: always
+    build:
+      context: ./backend
+    environment:
+      MONGO_URL: ${MONGO_URL}
+      MONGO_DB_NAME: ${MONGO_DB_NAME}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL}
+      UPLOAD_DIR: ${UPLOAD_DIR:-/data/xhs-publish/uploads}
+      MAX_UPLOAD_SIZE_MB: ${MAX_UPLOAD_SIZE_MB:-10}
+      XHS_APP_KEY: ${XHS_APP_KEY}
+      XHS_APP_SECRET: ${XHS_APP_SECRET}
+      XHS_ACCESS_TOKEN_URL: ${XHS_ACCESS_TOKEN_URL:-https://edith.xiaohongshu.com/api/sns/v1/ext/access/token}
+      XHS_REQUEST_TIMEOUT_MS: ${XHS_REQUEST_TIMEOUT_MS:-5000}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ${UPLOAD_HOST_DIR:-./uploads}:${UPLOAD_DIR:-/data/xhs-publish/uploads}
+    expose:
+      - "8000"
+    networks:
+      - default_net
+
+  frontend:
+    image: xhs-publish-frontend:latest
+    container_name: xhs-publish-frontend
+    restart: always
+    build:
+      context: ./frontend
+      dockerfile: ${FRONTEND_DOCKERFILE:-Dockerfile}
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
+        VITE_PUBLIC_BASE_URL: ${VITE_PUBLIC_BASE_URL:-https://your-domain.com}
+        VITE_XHS_SDK_URL: ${VITE_XHS_SDK_URL:-https://fe-static.xhscdn.com/biz-static/goten/xhs-1.0.1.js}
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-5174}:80"
+    environment:
+      BACKEND_UPSTREAM: http://backend:8000
+    volumes:
+      - ${UPLOAD_HOST_DIR:-./uploads}:${UPLOAD_DIR:-/data/xhs-publish/uploads}:ro
+    networks:
+      - default_net
