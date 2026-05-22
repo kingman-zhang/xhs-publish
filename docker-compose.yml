@@ -1,5 +1,5 @@
 networks:
-  default_net:
+  software_app-net:
     external: true
 services:
   backend:
@@ -25,7 +25,7 @@ services:
     expose:
       - "8000"
     networks:
-      - default_net
+      - software_app-net
 
   frontend:
     image: xhs-publish-frontend:latest
@@ -47,4 +47,4 @@ services:
     volumes:
       - ${UPLOAD_HOST_DIR:-./uploads}:${UPLOAD_DIR:-/data/xhs-publish/uploads}:ro
     networks:
-      - default_net
+      - software_app-net
